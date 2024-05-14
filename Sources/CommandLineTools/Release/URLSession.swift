@@ -13,6 +13,9 @@ extension URLSession {
 private class ReleaseMockURLProtocol: URLProtocol {
     static let uploadURLString = URL(string: "https://api.github.com/upload")!
     
+    override class func canInit(with request: URLRequest) -> Bool { true }
+    override class func canonicalRequest(for request: URLRequest) -> URLRequest { request }
+    
     override func startLoading() {
         if isReleaseRequest {
             let response = GitHubRelease(htmlURL: URL(string: "https://github.com/owner/repo/release/v1.0.0")!,
@@ -38,17 +41,7 @@ private class ReleaseMockURLProtocol: URLProtocol {
         client?.urlProtocol(self, didFailWithError: NSError(domain: "URLProtocol", code: -1))
     }
 
-    override func stopLoading() {
-        //  no-op
-    }
-
-    override class func canonicalRequest(for request: URLRequest) -> URLRequest {
-        request
-    }
-
-    override class func canInit(with request: URLRequest) -> Bool {
-        true
-    }
+    override func stopLoading() { }
     
     // MARK: -
     
