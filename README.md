@@ -1,4 +1,2 @@
-# .github
-Default metadata files for repos in this org.
-
-If you're seeing this readme in your project, your project is configured wrong.
+# Swift Command Line Tools
+Helpful tools for use in Swift command line executables.
