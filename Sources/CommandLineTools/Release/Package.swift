@@ -75,7 +75,7 @@ public struct Package {
         let body = GitHubReleaseRequest(tagName: product.version,
                                         targetCommitish: "main",
                                         name: product.version,
-                                        body: "https://github.com/\(product.sourceRepo)/tree/\(product.commitHash)",
+                                        body: "https://github.com/\(product.sourceRepo.owner)/\(product.sourceRepo.name)/tree/\(product.commitHash)",
                                         draft: false,
                                         prerelease: false,
                                         generateReleaseNotes: false,
