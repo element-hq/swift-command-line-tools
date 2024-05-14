@@ -9,16 +9,18 @@ public struct Package {
     
     /// The API token used to make releases on GitHub.
     private let apiToken: String
+    private let urlSession: URLSession
     
     /// The repository that hosts this package.
     public let repository: Repository
     /// The local directory that the repository is cloned in.
     public let directory: URL
     
-    public init(repository: Repository, directory: URL, apiToken: String) {
+    public init(repository: Repository, directory: URL, apiToken: String, urlSession: URLSession = .shared) {
         self.repository = repository
         self.directory = directory
         self.apiToken = apiToken
+        self.urlSession = urlSession
     }
     
     /// Zips up the XCFramework from the given product, returning the file's URL and checksum.
@@ -86,7 +88,7 @@ public struct Package {
         let bodyData = try encoder.encode(body)
         request.httpBody = bodyData
         
-        let (data, _) = try await URLSession.shared.data(for: request)
+        let (data, _) = try await urlSession.data(for: request)
         let release = try JSONDecoder().decode(GitHubRelease.self, from: data)
         
         Log.info("Release created \(release.htmlURL)")
@@ -108,7 +110,7 @@ public struct Package {
         request.addValue("Bearer \(apiToken)", forHTTPHeaderField: "Authorization")
         request.addValue("application/zip", forHTTPHeaderField: "Content-Type")
         
-        let (data, response) = try await URLSession.shared.upload(for: request, fromFile: fileURL)
+        let (data, response) = try await urlSession.upload(for: request, fromFile: fileURL)
         
         guard let httpResponse = response as? HTTPURLResponse else {
             throw Error.httpResponse(-1)
@@ -147,7 +149,7 @@ struct GitHubReleaseRequest: Encodable {
     let makeLatest: String
 }
 
-struct GitHubRelease: Decodable {
+struct GitHubRelease: Codable {
     let htmlURL: URL
     let uploadURLString: String // Decode as a string to avoid URL percent encoding.
     
@@ -161,7 +163,7 @@ struct GitHubRelease: Decodable {
     }
 }
 
-struct GitHubUploadResponse: Decodable {
+struct GitHubUploadResponse: Codable {
     let browserDownloadURL: String
     
     enum CodingKeys: String, CodingKey {
