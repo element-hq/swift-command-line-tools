@@ -4,7 +4,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "CommandLineTools",
+    name: "swift-command-line-tools",
     platforms: [
         .macOS(.v13)
     ],
