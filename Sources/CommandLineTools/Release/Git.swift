@@ -2,6 +2,14 @@ import Foundation
 
 /// A local git repo.
 public struct Git {
+    /// Clone a repository into a new directory, creating a new `Git` instance.
+    public static func clone(repository: URL, directory: URL) throws -> Git {
+        if !FileManager.default.fileExists(atPath: directory.path()) {
+            try Zsh.run(command: "git clone \(repository.absoluteURL) \(directory.path())")
+        }
+        return Git(directory: directory)
+    }
+    
     enum Error: Swift.Error {
         case noOutput
     }
@@ -27,6 +35,16 @@ public struct Git {
             guard let output = try Zsh.run(command: "git rev-parse HEAD", directory: directory) else { throw Error.noOutput }
             return output.trimmingCharacters(in: .whitespacesAndNewlines)
         }
+    }
+    
+    /// Download objects and refs from another repository
+    public func fetch() throws {
+        try Zsh.run(command: "git fetch", directory: directory)
+    }
+    
+    /// Switch branches or restore working tree files
+    public func checkout(branch: String) throws {
+        try Zsh.run(command: "git checkout \(branch)", directory: directory)
     }
     
     /// Add file contents to the index.
