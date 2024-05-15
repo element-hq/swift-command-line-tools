@@ -1,9 +1,13 @@
+import Darwin
 import Foundation
 
 public enum Zsh {
     enum Error: Swift.Error {
         case commandFailure(command: String, directory: URL?)
     }
+    
+    /// The currently running process, used to allow a SIGINT to terminate a long running task.
+    private static var currentProcess: Process?
     
     /// A default directory to used when `run(command:)` is called without a directory specified.
     public static var defaultDirectory: URL?
@@ -22,6 +26,10 @@ public enum Zsh {
         process.arguments = ["-cu", command]
         process.currentDirectoryURL = directory ?? defaultDirectory
         process.standardOutput = outputPipe
+        
+        currentProcess = process
+        defer { currentProcess = nil }
+        signal(SIGINT) { _ in Zsh.currentProcess?.terminate() }
         
         try process.run()
         process.waitUntilExit()
