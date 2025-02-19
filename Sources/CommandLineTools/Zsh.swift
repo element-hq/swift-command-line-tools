@@ -17,15 +17,19 @@ public enum Zsh {
     /// - Parameters:
     ///   - command: The command to be run.
     ///   - directory: An optional working directory in which to run the command. When omitted, ``defaultDirectory`` will be used if set.
-    /// - Returns: The output of the command if any.
-    public static func run(command: String, directory: URL? = nil) throws -> String? {
+    ///   - captureStandardOutput: A flag to control whether or not the command output is captured or printed to the terminal
+    /// - Returns: The output of the command if `captureStandardOutput == true` and the command printed something.
+    public static func run(command: String, directory: URL? = nil, captureStandardOutput: Bool = true) throws -> String? {
         let process = Process()
         let outputPipe = Pipe()
         
         process.executableURL = URL(fileURLWithPath: "/bin/zsh")
         process.arguments = ["-cu", command]
         process.currentDirectoryURL = directory ?? defaultDirectory
-        process.standardOutput = outputPipe
+        
+        if captureStandardOutput {
+            process.standardOutput = outputPipe
+        }
         
         currentProcess = process
         defer { currentProcess = nil }
@@ -38,7 +42,7 @@ public enum Zsh {
             throw Error.commandFailure(command: command, directory: directory ?? defaultDirectory)
         }
         
-        guard let outputData = try outputPipe.fileHandleForReading.readToEnd() else { return nil }
+        guard captureStandardOutput, let outputData = try outputPipe.fileHandleForReading.readToEnd() else { return nil }
         return String(data: outputData, encoding: .utf8)
     }
 }
