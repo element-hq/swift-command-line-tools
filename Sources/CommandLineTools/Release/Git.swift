@@ -67,6 +67,7 @@ public struct Git {
         try Zsh.run(command: "git reset\(hard ? " --hard" : "")", directory: directory)
     }
     
+    /// Clean any untracked files (and optionally directories) in the repository.
     public func clean(includeDirectories: Bool = false) throws {
         try Zsh.run(command: "git clean -f\(includeDirectories ? "" : "d")", directory: directory)
     }
