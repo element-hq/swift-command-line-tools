@@ -61,4 +61,9 @@ public struct Git {
     public func push() throws {
         try Zsh.run(command: "git push", directory: directory)
     }
+    
+    /// Reset any changes in the repository.
+    public func reset(hard: Bool = false) throws {
+        try Zsh.run(command: "git reset \(hard ? "--hard" : "")", directory: directory)
+    }
 }
