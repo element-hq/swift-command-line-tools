@@ -17,15 +17,21 @@ public enum Zsh {
     /// - Parameters:
     ///   - command: The command to be run.
     ///   - directory: An optional working directory in which to run the command. When omitted, ``defaultDirectory`` will be used if set.
+    ///   - environment: The environment to use when running the command. When omitted, the environment will be inherited from the caller's process.
     ///   - captureStandardOutput: A flag to control whether or not the command output is captured or printed to the terminal
     /// - Returns: The output of the command if `captureStandardOutput == true` and the command printed something.
-    public static func run(command: String, directory: URL? = nil, captureStandardOutput: Bool = true) throws -> String? {
+    public static func run(command: String, directory: URL? = nil, environment: [String: String]? = nil, captureStandardOutput: Bool = true) throws -> String? {
         let process = Process()
         let outputPipe = Pipe()
         
         process.executableURL = URL(fileURLWithPath: "/bin/zsh")
         process.arguments = ["-cu", command]
         process.currentDirectoryURL = directory ?? defaultDirectory
+        
+        if let environment {
+            // Despite this property being optional, setting it to nil behaves like setting it to [:] 🤨
+            process.environment = environment
+        }
         
         if captureStandardOutput {
             process.standardOutput = outputPipe
